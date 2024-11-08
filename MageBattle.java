@@ -11,6 +11,8 @@ import java.util.Random;
 
 public class MageBattle extends CharacterBattle {
 
+    private Thread gameTimerThread;
+    private int remainingTime = 60;
     private Timer fireballTimer, lightningTimer;
     private ArrayList<Fireball> fireballs;
     private ArrayList<Lightning> lightnings;
@@ -27,6 +29,7 @@ public class MageBattle extends CharacterBattle {
         initializeGameObjects();
         initializeTimers();
         setupKeyListener();
+        startGameTimer();
     }
 
     private void loadImages() {
@@ -245,7 +248,12 @@ public class MageBattle extends CharacterBattle {
         drawHealthBars(g);
         g.setColor(Color.RED);
         drawLightningSpeed(g);
-
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        String timeText = "Time Left: " + remainingTime + "s";
+        FontMetrics fm = g.getFontMetrics();
+        int x = (getWidth() - fm.stringWidth(timeText)) / 2;
+        g.drawString(timeText, x, 30);
     }
 
     private void drawBackground(Graphics g) {
@@ -355,8 +363,11 @@ public class MageBattle extends CharacterBattle {
         label.setForeground(Color.WHITE);
         backgroundLabel.add(label, BorderLayout.NORTH);
 
-        JButton retryButton = new JButton("Play Again");
-        retryButton.setFont(new Font("Arial", Font.PLAIN, 20));
+        ImageIcon playagain = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/playagain.png"));
+        JButton retryButton = new JButton(playagain);
+        retryButton.setPreferredSize(new Dimension(140, 30));
+
+        
         retryButton.addActionListener(e -> {
             JFrame gameWindow = new JFrame("Character Battle");
             CharacterBattle gamePanel = new MageBattle(lightningDelay);
@@ -370,9 +381,11 @@ public class MageBattle extends CharacterBattle {
             gameOverFrame.dispose();
         });
 
-        JButton retryhardButton = new JButton("Play Again Harder");
-        retryhardButton.setFont(new Font("Arial", Font.PLAIN, 20));
-        retryhardButton.addActionListener(e -> {
+        ImageIcon harderimage = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/harder.png"));
+        JButton retryHarderButton = new JButton(harderimage);
+        retryHarderButton.setPreferredSize(new Dimension(140, 30));
+        
+        retryHarderButton.addActionListener(e -> {
 
             if (this.lightningDelay > 1000) {
                 this.lightningDelay -= 500;
@@ -384,7 +397,7 @@ public class MageBattle extends CharacterBattle {
 
             JFrame gameWindow = new JFrame("Battle Harder");
             MageBattle gamePanel = new MageBattle(this.lightningDelay);
-
+            
             gameWindow.setSize(800, 600);
             gameWindow.setResizable(false);
             gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -393,9 +406,10 @@ public class MageBattle extends CharacterBattle {
 
             gameOverFrame.dispose();
         });
-
-        JButton gamewd = new JButton("Main menu");
-        gamewd.setFont(new Font("Arial", Font.PLAIN, 20));
+        ImageIcon mainmenu = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/mainmenu.png"));
+        JButton gamewd = new JButton(mainmenu);
+        gamewd.setPreferredSize(new Dimension(140, 30));
+        
         gamewd.addActionListener(e -> {
 
             JFrame gameWindow = new JFrame("Game Window");
@@ -409,6 +423,10 @@ public class MageBattle extends CharacterBattle {
 
             gameOverFrame.dispose();
         });
+        ImageIcon exit = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/exitgame.png"));
+        JButton exitButton = new JButton(exit);
+        exitButton.setPreferredSize(new Dimension(140, 30));
+        exitButton.addActionListener(e -> System.exit(0));
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(0, 0, 0, 0));
@@ -428,7 +446,9 @@ public class MageBattle extends CharacterBattle {
 
         gbc.gridy = 2;
 
-        buttonPanel.add(retryhardButton, gbc);
+        buttonPanel.add(retryHarderButton, gbc);
+        gbc.gridy = 3;
+        buttonPanel.add(exitButton, gbc);
 
         backgroundLabel.add(buttonPanel, BorderLayout.CENTER);
 
@@ -447,6 +467,23 @@ public class MageBattle extends CharacterBattle {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(gamePanel);
         frame.setVisible(true);
+    }
+
+    private void startGameTimer() {
+        gameTimerThread = new Thread(() -> {
+            try {
+                while (remainingTime > 0) {
+                    Thread.sleep(1000); 
+                    remainingTime--; 
+                    repaint(); 
+                }
+             
+                showGameOverScreen(false);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        gameTimerThread.start();
     }
 
 }

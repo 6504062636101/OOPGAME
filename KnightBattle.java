@@ -11,6 +11,8 @@ import java.util.Random;
 
 public class KnightBattle extends CharacterBattle {
 
+    private Thread gameTimerThread;
+    private int remainingTime = 60;
     private Timer waterwaveTimer, lightningTimer;
     private ArrayList<Waterwave> waterwaves;
     private Image[] waterwaveFrames;
@@ -28,6 +30,7 @@ public class KnightBattle extends CharacterBattle {
         initializeGameObjects();
         initializeTimers();
         setupKeyListener();
+        startGameTimer();
     }
 
     private void loadImages() {
@@ -49,6 +52,7 @@ public class KnightBattle extends CharacterBattle {
         this.waterwaveFramesLeft = new Image[]{
             new ImageIcon(getClass().getResource("/com/mycompany/gameproject/knightattackright.png")).getImage()
         };
+
     }
 
     private void initializeGameObjects() {
@@ -257,6 +261,12 @@ public class KnightBattle extends CharacterBattle {
         drawKnightHealthBar(g);
         drawWaterwaves(g);
         drawLightningSpeed(g);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        String timeText = "Time Left: " + remainingTime + "s";
+        FontMetrics fm = g.getFontMetrics();
+        int x = (getWidth() - fm.stringWidth(timeText)) / 2;
+        g.drawString(timeText, x, 30);
     }
 
     private void drawBackground(Graphics g) {
@@ -343,7 +353,7 @@ public class KnightBattle extends CharacterBattle {
     }
 
     public void showGameOverScreen(boolean victory) {
-        // หยุด timers
+
         waterwaveTimer.stop();
         lightningTimer.stop();
 
@@ -365,8 +375,11 @@ public class KnightBattle extends CharacterBattle {
         label.setForeground(Color.WHITE);
         backgroundLabel.add(label, BorderLayout.NORTH);
 
-        JButton retryButton = new JButton("Play Again");
-        retryButton.setFont(new Font("Arial", Font.PLAIN, 20));
+        ImageIcon playagain = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/playagain.png"));
+        JButton retryButton = new JButton(playagain);
+        retryButton.setPreferredSize(new Dimension(140, 30));
+
+        
         retryButton.addActionListener(e -> {
             JFrame gameWindow = new JFrame("Character Battle");
             CharacterBattle gamePanel = new KnightBattle(lightningDelay);
@@ -380,9 +393,11 @@ public class KnightBattle extends CharacterBattle {
             gameOverFrame.dispose();
         });
 
-        JButton retryhardButton = new JButton("Play Again Harder");
-        retryhardButton.setFont(new Font("Arial", Font.PLAIN, 20));
-        retryhardButton.addActionListener(e -> {
+        ImageIcon harderimage = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/harder.png"));
+        JButton retryHarderButton = new JButton(harderimage);
+        retryHarderButton.setPreferredSize(new Dimension(140, 30));
+        
+        retryHarderButton.addActionListener(e -> {
 
             if (this.lightningDelay > 1000) {
                 this.lightningDelay -= 500;
@@ -393,8 +408,8 @@ public class KnightBattle extends CharacterBattle {
             }
 
             JFrame gameWindow = new JFrame("Battle Harder");
-            KnightBattle gamePanel = new KnightBattle(this.lightningDelay); // ส่งค่า lightningDelay[0] ใหม่
-
+            KnightBattle gamePanel = new KnightBattle(this.lightningDelay);
+            
             gameWindow.setSize(800, 600);
             gameWindow.setResizable(false);
             gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -403,9 +418,10 @@ public class KnightBattle extends CharacterBattle {
 
             gameOverFrame.dispose();
         });
-
-        JButton gamewd = new JButton("Main menu");
-        gamewd.setFont(new Font("Arial", Font.PLAIN, 20));
+        ImageIcon mainmenu = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/mainmenu.png"));
+        JButton gamewd = new JButton(mainmenu);
+        gamewd.setPreferredSize(new Dimension(140, 30));
+        
         gamewd.addActionListener(e -> {
 
             JFrame gameWindow = new JFrame("Game Window");
@@ -419,6 +435,10 @@ public class KnightBattle extends CharacterBattle {
 
             gameOverFrame.dispose();
         });
+        ImageIcon exit = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/exitgame.png"));
+        JButton exitButton = new JButton(exit);
+        exitButton.setPreferredSize(new Dimension(140, 30));
+        exitButton.addActionListener(e -> System.exit(0));
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(0, 0, 0, 0));
@@ -438,7 +458,9 @@ public class KnightBattle extends CharacterBattle {
 
         gbc.gridy = 2;
 
-        buttonPanel.add(retryhardButton, gbc);
+        buttonPanel.add(retryHarderButton, gbc);
+        gbc.gridy = 3;
+        buttonPanel.add(exitButton, gbc);
 
         backgroundLabel.add(buttonPanel, BorderLayout.CENTER);
 
@@ -448,4 +470,20 @@ public class KnightBattle extends CharacterBattle {
         SwingUtilities.getWindowAncestor(this).dispose();
     }
 
+    private void startGameTimer() {
+        gameTimerThread = new Thread(() -> {
+            try {
+                while (remainingTime > 0) {
+                    Thread.sleep(1000);  // รอ 1 วินาที
+                    remainingTime--;  // ลดเวลาลงทีละ 1 วินาที
+                    repaint();  // รีเฟรชหน้าจอเพื่อแสดงเวลาที่เหลือ
+                }
+                // ถ้าเวลาหมดแล้ว แต่เกมยังไม่จบ
+                showGameOverScreen(false);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        gameTimerThread.start();
+    }
 }

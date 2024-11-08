@@ -11,10 +11,8 @@ public class CharacterSelectionWindow extends JPanel {
     ImageIcon buttonIconmage = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/mageLOGO.png"));
 
     public CharacterSelectionWindow() {
-        // Load the background image
-        backgroundImage = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/origbig.png")).getImage();
+        backgroundImage = new ImageIcon(getClass().getResource("/com/mycompany/gameproject/origbig2.png")).getImage();
 
-        // Load the custom font for the title label
         Font customFont = loadCustomFont("E:\\GameProject\\src\\main\\java\\com\\mycompany\\gameproject\\fonts\\PressStart2P.ttf", 24f);
 
         setLayout(new BorderLayout());
@@ -27,10 +25,8 @@ public class CharacterSelectionWindow extends JPanel {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-        // Create knight panel with button and label
         JPanel knightPanel = createCharacterPanel("Knight");
 
-        // Create mage panel with button and label
         JPanel magePanel = createCharacterPanel("Mage");
 
         buttonPanel.setBackground(new Color(0, 0, 0, 0));
@@ -65,9 +61,6 @@ public class CharacterSelectionWindow extends JPanel {
             characterButton = new JButton(buttonIconmage); // Mage button uses mage icon
         }
 
-        characterButton.setContentAreaFilled(false);
-        characterButton.setBorderPainted(false);
-        characterButton.setFocusPainted(false);
         Dimension buttonSize = new Dimension(150, 50);
         characterButton.setPreferredSize(buttonSize);
 
@@ -77,11 +70,9 @@ public class CharacterSelectionWindow extends JPanel {
         characterButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, characterName + " Selected!");
 
-            // Close the current window (Character Selection Window)
             JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             parentFrame.dispose();
 
-            // Open the corresponding battle window
             if (characterName.equals("Knight")) {
                 openKnightBattle();
             } else if (characterName.equals("Mage")) {
